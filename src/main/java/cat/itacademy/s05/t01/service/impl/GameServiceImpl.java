@@ -3,7 +3,8 @@ package cat.itacademy.s05.t01.service.impl;
 import cat.itacademy.s05.t01.exception.InactiveGameException;
 import cat.itacademy.s05.t01.exception.NoGameFoundException;
 import cat.itacademy.s05.t01.model.Game;
-import cat.itacademy.s05.t01.model.enums.ParticipantAction;
+import cat.itacademy.s05.t01.enums.ParticipantAction;
+import cat.itacademy.s05.t01.model.MoveResponseDTO;
 import cat.itacademy.s05.t01.repository.GameRepository;
 import cat.itacademy.s05.t01.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +27,16 @@ public class GameServiceImpl implements GameService {
         return gameRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NoGameFoundException("Game not found with id " + id)));
     }
-    //el switchIfEmpty no sé si hace falta? ya que se gestiona bien el null desde el controller...!
 
     @Override
-    public Mono<String> makeMove(String id, ParticipantAction participantAction) {
+    public Mono<MoveResponseDTO> makeMove(String id, ParticipantAction participantAction) {
         return gameRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NoGameFoundException("Game not found with id " + id)))
                 .flatMap(existingGame -> {
                     if (!existingGame.isActive()) {
                         return Mono.error(new InactiveGameException("Game with id " + id + " is over."));
                     }
-                    String result = existingGame.makeMove(participantAction);
+                    MoveResponseDTO result = existingGame.makeMove(participantAction);
 
                     return gameRepository.save(existingGame).thenReturn(result);
                 });

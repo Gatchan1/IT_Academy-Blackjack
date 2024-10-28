@@ -1,7 +1,8 @@
 package cat.itacademy.s05.t01.controller;
 
 import cat.itacademy.s05.t01.model.Game;
-import cat.itacademy.s05.t01.model.enums.ParticipantAction;
+import cat.itacademy.s05.t01.enums.ParticipantAction;
+import cat.itacademy.s05.t01.model.MoveResponseDTO;
 import cat.itacademy.s05.t01.service.impl.GameServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,7 @@ public class GameController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<Game>> getGameDetails(@PathVariable String id) {
         return gameService.getGameDetails(id)
-                .map(ResponseEntity::ok)
-                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));   //linea redundante?
+                .map(ResponseEntity::ok);
     }
     // get game details:
     // Whose turn is it, what total cards value does everyone have...
@@ -41,18 +41,15 @@ public class GameController {
 
     //post "game/{id}/play"
     @PostMapping("/{id}/play")
-    public Mono<ResponseEntity<String>> makeMove(@PathVariable String id, @RequestBody ParticipantAction participantAction) {
+    public Mono<ResponseEntity<MoveResponseDTO>> makeMove(@PathVariable String id, @RequestBody ParticipantAction participantAction) {
         return gameService.makeMove(id, participantAction)
-                .map(moveResult -> ResponseEntity
+                .map(moveResponse -> ResponseEntity
                         .ok()
-                        .body(moveResult))
-                        .switchIfEmpty(Mono.just(ResponseEntity.notFound().build())); //linea redundante?
+                        .body(moveResponse));
     }
-    // a player makes a turn (body -> hit or stand)
-    // successful response = Code 200 OK +:
-    // if the play was a "hit", what card did the player get
-    // and what's his total cards value.
-    // Also: is the game running or over.
+    // a player makes a move (body -> hit or stand)
+    // successful response = Code 200 OK + info on the move.
+    // Also: is the game still running or over.
 
     //delete "game/{id}/delete"
     // delete one specific game

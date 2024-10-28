@@ -1,10 +1,8 @@
 package cat.itacademy.s05.t01.model.card;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class NonAceCard implements Card{
     private int value;
 

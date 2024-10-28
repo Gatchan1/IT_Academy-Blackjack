@@ -1,22 +1,20 @@
 package cat.itacademy.s05.t01.model.participant;
 
-import cat.itacademy.s05.t01.model.enums.ParticipantFinalStatus;
+import cat.itacademy.s05.t01.enums.PlayerFinalStatus;
 import cat.itacademy.s05.t01.model.card.AceCard;
 import cat.itacademy.s05.t01.model.card.Card;
 import cat.itacademy.s05.t01.model.card.NonAceCard;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 public abstract class GameParticipant {
     private int handValue;
     private List<Card> cardsInHand = new ArrayList<>();
     private boolean isActive = true;
-    private ParticipantFinalStatus finalStatus;
+    private PlayerFinalStatus finalStatus;
 
     public void addCard(Card givenCard) {
         cardsInHand.add(givenCard);
@@ -45,7 +43,7 @@ public abstract class GameParticipant {
 
     private void bust() {
         isActive = false;
-        finalStatus = ParticipantFinalStatus.LOSE;
+        finalStatus = PlayerFinalStatus.LOSE;
     }
 
     public void stand() {

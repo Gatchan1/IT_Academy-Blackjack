@@ -1,9 +1,10 @@
 package cat.itacademy.s05.t01.model;
 
+import cat.itacademy.s05.t01.enums.PlayerFinalStatus;
 import cat.itacademy.s05.t01.model.card.AceCard;
 import cat.itacademy.s05.t01.model.card.Card;
 import cat.itacademy.s05.t01.model.card.NonAceCard;
-import cat.itacademy.s05.t01.model.enums.ParticipantAction;
+import cat.itacademy.s05.t01.enums.ParticipantAction;
 import cat.itacademy.s05.t01.model.participant.Croupier;
 import cat.itacademy.s05.t01.model.participant.GameParticipant;
 import cat.itacademy.s05.t01.model.participant.Player;
@@ -23,7 +24,7 @@ public class Game {
     @Id private String id;
     @Setter private boolean isActive = true;
     @Setter private int playerTurn;
-    @Setter private List<? extends Card> undealtCards = generateInitialCardList();;
+    @Setter private List<? extends Card> undealtCards = generateInitialCardList();
     @Setter private Croupier croupier = new Croupier();
     @Setter private List<Player> players;
 
@@ -75,7 +76,7 @@ public class Game {
         return playerTurn >= players.size();
     }
 
-    public String makeMove(ParticipantAction participantAction) {
+    public MoveResponseDTO makeMove(ParticipantAction participantAction) {
         Player playerThatMakesMove = getCurrentPlayer();
         if (participantAction == ParticipantAction.HIT) {
             dealCardToCurrentPlayer();
@@ -83,54 +84,63 @@ public class Game {
             playerThatMakesMove.stand();
             playerTurn++;
         }
-
         if (isLastPlayerTurnOver()) {
             while (croupier.isActive()) {
                 if (croupier.getHandValue() < 17) {
                     giveCardToParticipant(croupier, retrieveCardFromDrawPile());
-                }
-                else croupier.stand();
+                } else croupier.stand();
             }
             isActive = false;
+            determinePlayersFinalStatuses();
         }
-        return getMoveInfo(playerThatMakesMove, participantAction);
+        return generateMoveResponseDTO(playerThatMakesMove, participantAction);
+    }
+
+    private void determinePlayersFinalStatuses() {
+        players.forEach(player -> player.setFinalStatus(determinePlayerFinalStatus(
+                player.getHandValue(), croupier.getHandValue())));
+    }
+
+    private PlayerFinalStatus determinePlayerFinalStatus(int playerHandValue, int croupierHandValue) {
+        boolean playerBusted = playerHandValue > 21;
+        boolean croupierBusted = croupierHandValue > 21;
+
+        if (playerBusted) return PlayerFinalStatus.LOSE;
+        if (!croupierBusted && playerHandValue < croupierHandValue) return PlayerFinalStatus.LOSE;
+        if (!croupierBusted && playerHandValue == croupierHandValue) return PlayerFinalStatus.TIE;
+
+        return PlayerFinalStatus.WIN;
+    }
+
+    private MoveResponseDTO generateMoveResponseDTO(Player player, ParticipantAction action) {
+        return new MoveResponseDTO(getMoveInfo(player, action), player.getName(),
+                action.name(), player.getHandValue(), player.isActive());
     }
 
     private String getMoveInfo(Player player, ParticipantAction participantAction) {
-        StringBuilder builder = new StringBuilder("Move Result: \n");
+        StringBuilder builder = new StringBuilder()
+                .append("%s has made a \"%s\" move.\n"
+                        .formatted(player.getName(), participantAction.name().toLowerCase()));
+
         if (participantAction == ParticipantAction.HIT) {
-            builder.append("""
-            %s has made a "hit" move.
-            """.formatted(player.getName()));
             if (player.isActive()) {
-                builder.append("""
-                Their current hand value is %d,
-                and it's still their turn.
-                """.formatted(player.getHandValue()));
+                builder.append("Their current hand value is %d, and it's still their turn."
+                        .formatted(player.getHandValue()));
             } else {
-                builder.append("""
-                They have busted at a hand value of %d,
-                and their turn is over (they lose).
-                """.formatted(player.getHandValue()));
-                if(isLastPlayerTurnOver()) {
-                    builder.append("The game is now over.");
-                } else {
-                    builder.append("""
-                    The next player is %s.""".formatted(players.get(playerTurn).getName()));
-                }
+                builder.append("They have busted at a hand value of %d, and their turn is over (they lose).\n"
+                                .formatted(player.getHandValue()))
+                        .append(getTurnOverMessage());
             }
         } else if (participantAction == ParticipantAction.STAND) {
-            builder.append("""
-            %s has made a "stand" move, with a hand value of %d.
-            Their turn is now over.
-            """.formatted(player.getName(), player.getHandValue()));
-            if(isLastPlayerTurnOver()) {
-                builder.append("The game is also over.");
-            } else {
-                builder.append("""
-                    The next player is %s.""".formatted(players.get(playerTurn).getName()));
-            }
+            builder.append("They stood with a hand value of %d. Their turn is now over.\n"
+                            .formatted(player.getHandValue()))
+                    .append(getTurnOverMessage());
         }
         return builder.toString();
+    }
+
+    private String getTurnOverMessage() {
+        return isLastPlayerTurnOver() ? "The game is over." : "The next player is %s."
+                .formatted(players.get(playerTurn).getName());
     }
 }

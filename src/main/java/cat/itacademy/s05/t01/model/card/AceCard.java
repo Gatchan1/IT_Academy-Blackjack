@@ -1,9 +1,7 @@
 package cat.itacademy.s05.t01.model.card;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class AceCard implements Card{
 }

@@ -5,6 +5,7 @@ import cat.itacademy.s05.t01.model.card.AceCard;
 import cat.itacademy.s05.t01.model.card.Card;
 import cat.itacademy.s05.t01.model.card.NonAceCard;
 import cat.itacademy.s05.t01.enums.ParticipantAction;
+import cat.itacademy.s05.t01.model.dto.MoveResponse;
 import cat.itacademy.s05.t01.model.participant.Croupier;
 import cat.itacademy.s05.t01.model.participant.GameParticipant;
 import cat.itacademy.s05.t01.model.participant.Player;
@@ -76,7 +77,7 @@ public class Game {
         return playerTurn >= players.size();
     }
 
-    public MoveResponseDTO makeMove(ParticipantAction participantAction) {
+    public MoveResponse makeMove(ParticipantAction participantAction) {
         Player playerThatMakesMove = getCurrentPlayer();
         if (participantAction == ParticipantAction.HIT) {
             dealCardToCurrentPlayer();
@@ -112,9 +113,9 @@ public class Game {
         return PlayerFinalStatus.WIN;
     }
 
-    private MoveResponseDTO generateMoveResponseDTO(Player player, ParticipantAction action) {
-        return new MoveResponseDTO(getMoveInfo(player, action), player.getName(),
-                action.name(), player.getHandValue(), player.isActive());
+    private MoveResponse generateMoveResponseDTO(Player player, ParticipantAction action) {
+        return new MoveResponse(getMoveInfo(player, action), player.getName(),
+                action.name(), player.getHandValue(), player.isActive(), !isActive);
     }
 
     private String getMoveInfo(Player player, ParticipantAction participantAction) {

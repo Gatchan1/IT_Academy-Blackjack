@@ -4,17 +4,18 @@ import cat.itacademy.s05.t01.exception.InactiveGameException;
 import cat.itacademy.s05.t01.exception.NoGameFoundException;
 import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.enums.ParticipantAction;
-import cat.itacademy.s05.t01.model.MoveResponseDTO;
+import cat.itacademy.s05.t01.model.dto.MoveResponse;
 import cat.itacademy.s05.t01.repository.GameRepository;
 import cat.itacademy.s05.t01.service.GameService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
+@RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
-    @Autowired
-    private GameRepository gameRepository;
+    private final GameRepository gameRepository;
+    private final UserServiceImpl userService;
 
     @Override
     public Mono<Game> createGame(Game newGame) {
@@ -29,22 +30,29 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Mono<MoveResponseDTO> makeMove(String id, ParticipantAction participantAction) {
+    public Mono<MoveResponse> makeMove(String id, ParticipantAction participantAction) {
         return gameRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NoGameFoundException("Game not found with id " + id)))
                 .flatMap(existingGame -> {
                     if (!existingGame.isActive()) {
                         return Mono.error(new InactiveGameException("Game with id " + id + " is over."));
                     }
-                    MoveResponseDTO result = existingGame.makeMove(participantAction);
+                    MoveResponse result = existingGame.makeMove(participantAction);
+                    Mono<Game> saveGameMono = gameRepository.save(existingGame);
 
-                    return gameRepository.save(existingGame).thenReturn(result);
+                    if (result.isGameOver()) {
+                        return userService.insertScores(existingGame)
+                                .thenMany(saveGameMono)
+                                .then(Mono.just(result));
+                    } else {
+                        return saveGameMono.thenReturn(result);
+                    }
                 });
     }
 
 
     @Override
-    public Mono<Game> deleteGame(String id) {
-        return null;
+    public Mono<Void> deleteGame(String id) {
+        return gameRepository.deleteById(id);
     }
 }

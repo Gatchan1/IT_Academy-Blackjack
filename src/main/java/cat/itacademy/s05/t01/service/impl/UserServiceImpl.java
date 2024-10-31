@@ -1,7 +1,7 @@
 package cat.itacademy.s05.t01.service.impl;
 
 import cat.itacademy.s05.t01.enums.PlayerFinalStatus;
-import cat.itacademy.s05.t01.exception.NoUserFoundException;
+import cat.itacademy.s05.t01.exception.custom.NoUserFoundException;
 import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.model.User;
 import cat.itacademy.s05.t01.model.dto.UserWithRowNumber;

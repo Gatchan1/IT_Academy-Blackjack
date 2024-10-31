@@ -1,7 +1,7 @@
 package cat.itacademy.s05.t01.service.impl;
 
-import cat.itacademy.s05.t01.exception.InactiveGameException;
-import cat.itacademy.s05.t01.exception.NoGameFoundException;
+import cat.itacademy.s05.t01.exception.custom.InactiveGameException;
+import cat.itacademy.s05.t01.exception.custom.NoGameFoundException;
 import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.enums.ParticipantAction;
 import cat.itacademy.s05.t01.model.dto.MoveResponse;
@@ -35,7 +35,8 @@ public class GameServiceImpl implements GameService {
                 .switchIfEmpty(Mono.error(new NoGameFoundException("Game not found with id " + id)))
                 .flatMap(existingGame -> {
                     if (!existingGame.isActive()) {
-                        return Mono.error(new InactiveGameException("Game with id " + id + " is over."));
+                        return Mono.error(new InactiveGameException("Game with id " + id + " is over, " +
+                                "doesn't allow new moves."));
                     }
                     MoveResponse result = existingGame.makeMove(participantAction);
                     Mono<Game> saveGameMono = gameRepository.save(existingGame);

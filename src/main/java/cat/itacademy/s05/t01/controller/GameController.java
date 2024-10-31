@@ -33,9 +33,6 @@ public class GameController {
         return gameService.getGameDetails(id)
                 .map(ResponseEntity::ok);
     }
-    // get game details:
-    // Whose turn is it, what total cards value does everyone have...
-    // successful response = Code 200 OK + the game details
 
     //post "game/{id}/play"
     @PostMapping("/{id}/play")
@@ -45,9 +42,6 @@ public class GameController {
                         .ok()
                         .body(moveResponse));
     }
-    // a player makes a move (body -> hit or stand)
-    // successful response = Code 200 OK + info on the move.
-    // Also: is the game still running or over.
 
     //delete "game/{id}/delete"
     @DeleteMapping("/{id}/delete")
@@ -55,6 +49,4 @@ public class GameController {
         return gameService.deleteGame(id)
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
-    // delete one specific game
-    // successful response = Code 204 No Content
 }

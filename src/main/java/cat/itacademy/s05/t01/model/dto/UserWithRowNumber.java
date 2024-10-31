@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class UserWithRowNumber {
-    private Long id;
+    private int id;
     private int rowNumber;
     private String name;
     private int score;

@@ -41,9 +41,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidParticipantActionException.class)
-    public Mono<ResponseEntity<String>> handleInvalidParticipantAction(InvalidParticipantActionException ex) {
+    public Mono<ResponseEntity<String>> handleInvalidParticipantAction(InvalidParticipantActionException e) {
+        log.error("Error; invalid move name: {}", e.getMessage());
         return Mono.just(ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage()));
+                .body(e.getMessage()));
     }
 }

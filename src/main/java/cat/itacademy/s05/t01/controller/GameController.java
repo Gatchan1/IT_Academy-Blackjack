@@ -4,6 +4,7 @@ import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.enums.ParticipantAction;
 import cat.itacademy.s05.t01.model.dto.MoveResponse;
 import cat.itacademy.s05.t01.service.impl.GameServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class GameController {
 
     //post "/game/new"
     @PostMapping("/new")
-    public Mono<ResponseEntity<Game>> createGame(@RequestBody Game newGame) {
+    public Mono<ResponseEntity<Game>> createGame(@RequestBody @Valid Game newGame) {
         return gameService.createGame(newGame)
                 .map(createdGame -> ResponseEntity
                         .created(URI.create("/game/" + createdGame.getId()))

@@ -9,8 +9,9 @@ import cat.itacademy.s05.t01.model.dto.MoveResponse;
 import cat.itacademy.s05.t01.model.participant.Croupier;
 import cat.itacademy.s05.t01.model.participant.GameParticipant;
 import cat.itacademy.s05.t01.model.participant.Player;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -21,15 +22,19 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Document
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Document
 public class Game {
     @Id private String id;
     @Setter private boolean isActive = true;
     @Setter private int playerTurn;
     @Setter private List<? extends Card> undealtCards = generateInitialCardList();
     @Setter private Croupier croupier = new Croupier();
-    @Setter private List<Player> players;
+    @NotNull(message = "Players list cannot be null")
+    @Setter @Valid private List<Player> players;
 
     private List<? extends Card> generateInitialCardList() {
         return Stream.of(

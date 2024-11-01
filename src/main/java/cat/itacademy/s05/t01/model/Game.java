@@ -114,8 +114,14 @@ public class Game {
     }
 
     private MoveResponse generateMoveResponseDTO(Player player, ParticipantAction action) {
-        return new MoveResponse(getMoveInfo(player, action), player.getName(),
-                action.name(), player.getHandValue(), player.isActive(), !isActive);
+        return MoveResponse.builder()
+                .info(getMoveInfo(player, action))
+                .playerName(player.getName())
+                .move(action.name())
+                .handValue(player.getHandValue())
+                .turnContinues(player.isActive())
+                .gameOver(!isActive)
+                .build();
     }
 
     private String getMoveInfo(Player player, ParticipantAction participantAction) {

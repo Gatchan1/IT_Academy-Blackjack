@@ -12,6 +12,7 @@ import cat.itacademy.s05.t01.model.participant.Player;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Document
 @Getter
 public class Game {
     @Id private String id;
@@ -151,3 +153,4 @@ public class Game {
                 .formatted(players.get(playerTurn).getName());
     }
 }
+

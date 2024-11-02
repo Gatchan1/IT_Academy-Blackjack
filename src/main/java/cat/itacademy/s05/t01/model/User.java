@@ -1,12 +1,12 @@
 package cat.itacademy.s05.t01.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Table("users")
 public class User {

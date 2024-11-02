@@ -2,8 +2,8 @@ package cat.itacademy.s05.t01.exception;
 
 import cat.itacademy.s05.t01.exception.custom.InactiveGameException;
 import cat.itacademy.s05.t01.exception.custom.InvalidParticipantActionException;
-import cat.itacademy.s05.t01.exception.custom.NoGameFoundException;
-import cat.itacademy.s05.t01.exception.custom.NoUserFoundException;
+import cat.itacademy.s05.t01.exception.custom.GameNotFoundException;
+import cat.itacademy.s05.t01.exception.custom.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,16 +27,16 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage()));
     }
 
-    @ExceptionHandler(NoGameFoundException.class)
-    public Mono<ResponseEntity<String>> handleNoGameFoundException(NoGameFoundException e) {
+    @ExceptionHandler(GameNotFoundException.class)
+    public Mono<ResponseEntity<String>> handleGameNotFoundException(GameNotFoundException e) {
         log.error("Error. Non existing game entry in database: {}", e.getMessage());
         return Mono.just(ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage()));
     }
 
-    @ExceptionHandler(NoUserFoundException.class)
-    public Mono<ResponseEntity<String>> handleNoUserFoundException(NoUserFoundException e) {
+    @ExceptionHandler(UserNotFoundException.class)
+    public Mono<ResponseEntity<String>> handleUserNotFoundException(UserNotFoundException e) {
         log.error("Error. Non existing user entry in database: {}", e.getMessage());
         return Mono.just(ResponseEntity
                 .status(HttpStatus.NOT_FOUND)

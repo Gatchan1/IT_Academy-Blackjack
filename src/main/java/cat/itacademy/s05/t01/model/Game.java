@@ -10,7 +10,7 @@ import cat.itacademy.s05.t01.model.participant.Croupier;
 import cat.itacademy.s05.t01.model.participant.GameParticipant;
 import cat.itacademy.s05.t01.model.participant.Player;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Getter
-@Builder
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Document
@@ -33,7 +33,8 @@ public class Game {
     @Setter private int playerTurn;
     @Setter private List<? extends Card> undealtCards = generateInitialCardList();
     @Setter private Croupier croupier = new Croupier();
-    @NotNull(message = "Players list cannot be null")
+
+    @NotEmpty(message = "Players list cannot be null")
     @Setter @Valid private List<Player> players;
 
     private List<? extends Card> generateInitialCardList() {
@@ -80,10 +81,6 @@ public class Game {
         if (!getCurrentPlayer().isActive()) playerTurn++;
     }
 
-    private boolean isLastPlayerTurnOver() {
-        return playerTurn >= players.size();
-    }
-
     public MoveResponse makeMove(ParticipantAction participantAction) {
         Player playerThatMakesMove = getCurrentPlayer();
         if (participantAction == ParticipantAction.HIT) {
@@ -93,15 +90,23 @@ public class Game {
             playerTurn++;
         }
         if (isLastPlayerTurnOver()) {
-            while (croupier.isActive()) {
-                if (croupier.getHandValue() < 17) {
-                    giveCardToParticipant(croupier, retrieveCardFromDrawPile());
-                } else croupier.stand();
-            }
-            isActive = false;
-            determinePlayersFinalStatuses();
+            croupierActions();
         }
         return generateMoveResponseDTO(playerThatMakesMove, participantAction);
+    }
+
+    private boolean isLastPlayerTurnOver() {
+        return playerTurn >= players.size();
+    }
+
+    private void croupierActions() {
+        while (croupier.isActive()) {
+            if (croupier.getHandValue() < 17) {
+                giveCardToParticipant(croupier, retrieveCardFromDrawPile());
+            } else croupier.stand();
+        }
+        isActive = false;
+        determinePlayersFinalStatuses();
     }
 
     private void determinePlayersFinalStatuses() {

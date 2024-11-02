@@ -1,7 +1,7 @@
 package cat.itacademy.s05.t01.service.impl;
 
 import cat.itacademy.s05.t01.enums.PlayerFinalStatus;
-import cat.itacademy.s05.t01.exception.custom.NoUserFoundException;
+import cat.itacademy.s05.t01.exception.custom.UserNotFoundException;
 import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.model.User;
 import cat.itacademy.s05.t01.model.dto.UserWithRowNumber;
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<User> changeUserName(Integer playerId, String newName) {
         return userRepository.findById(playerId)
-                .switchIfEmpty(Mono.error(new NoUserFoundException("Player not found with id " + playerId)))
+                .switchIfEmpty(Mono.error(new UserNotFoundException("Player not found with id " + playerId)))
                 .flatMap(changingUser -> {
                     if (changingUser.getName().equals(newName)) return Mono.just(changingUser);
                     return userRepository.findByName(newName)

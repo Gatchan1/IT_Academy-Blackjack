@@ -5,11 +5,15 @@ import cat.itacademy.s05.t01.exception.custom.GameNotFoundException;
 import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.enums.ParticipantAction;
 import cat.itacademy.s05.t01.model.dto.MoveResponse;
+import cat.itacademy.s05.t01.model.dto.SimplePlayer;
+import cat.itacademy.s05.t01.model.participant.Player;
 import cat.itacademy.s05.t01.repository.GameRepository;
 import cat.itacademy.s05.t01.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,9 +22,17 @@ public class GameServiceImpl implements GameService {
     private final UserServiceImpl userService;
 
     @Override
-    public Mono<Game> createGame(Game newGame) {
+    public Mono<Game> createGame(List<SimplePlayer> players) {
+        List<Player> gamePlayers = players.stream().map(simplePlayer -> Player.builder()
+                .name(simplePlayer.getName())
+                .initialBet(simplePlayer.getInitialBet())
+                .build()).toList();
+        Game newGame = new Game();
+        newGame.setPlayers(gamePlayers);
         newGame.dealInitialCards();
-        return gameRepository.save(newGame);
+        return gameRepository.save(newGame)
+                .switchIfEmpty(Mono.error(new GameNotFoundException("Game not found")));
+        
     }
 
     @Override

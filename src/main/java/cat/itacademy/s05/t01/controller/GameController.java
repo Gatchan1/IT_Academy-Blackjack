@@ -3,6 +3,7 @@ package cat.itacademy.s05.t01.controller;
 import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.enums.ParticipantAction;
 import cat.itacademy.s05.t01.model.dto.MoveResponse;
+import cat.itacademy.s05.t01.model.dto.SimplePlayer;
 import cat.itacademy.s05.t01.service.impl.GameServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,8 +22,8 @@ public class GameController {
 
     //post "/game/new"
     @PostMapping("/new")
-    public Mono<ResponseEntity<Game>> createGame(@RequestBody @Valid Game newGame) {
-        return gameService.createGame(newGame)
+    public Mono<ResponseEntity<Game>> createGame(@RequestBody List<@Valid SimplePlayer> players) {
+                return gameService.createGame(players)
                 .map(createdGame -> ResponseEntity
                         .created(URI.create("/game/" + createdGame.getId()))
                         .body(createdGame))

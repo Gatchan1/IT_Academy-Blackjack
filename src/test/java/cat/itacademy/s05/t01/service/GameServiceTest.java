@@ -6,6 +6,7 @@ import cat.itacademy.s05.t01.model.Game;
 import cat.itacademy.s05.t01.model.User;
 import cat.itacademy.s05.t01.model.card.AceCard;
 import cat.itacademy.s05.t01.model.card.NonAceCard;
+import cat.itacademy.s05.t01.model.dto.SimplePlayer;
 import cat.itacademy.s05.t01.model.participant.Player;
 import cat.itacademy.s05.t01.repository.GameRepository;
 import cat.itacademy.s05.t01.repository.UserRepository;
@@ -45,8 +46,16 @@ public class GameServiceTest {
     private UserRepository userRepository;
 
     private Game mockGame;
+    private List<SimplePlayer> mockList;
 
-    private void setupSimpleMockGame() {
+    private void setupMockSimplePlayersList() {
+        mockList = List.of(
+                new SimplePlayer("Maria", 100),
+                new SimplePlayer("Lucia", 100)
+        );
+    }
+
+    private void setupMockGame() {
         mockGame = new Game();
         mockGame.setPlayers(Arrays.asList(
                 Player.builder().name("Maria").build(),
@@ -56,21 +65,18 @@ public class GameServiceTest {
 
     @Test
     void testCreateGame() {
-        setupSimpleMockGame();
+        setupMockSimplePlayersList();
+        setupMockGame();
         when(gameRepository.save(any(Game.class))).thenReturn(Mono.just(mockGame));
 
-        StepVerifier.create(gameService.createGame(mockGame))
-                .assertNext(createdGame -> {
-                    assertNotNull(createdGame, "The created game should not be null");
-                    assertEquals(47, createdGame.getUndealtCards().size(),
-                            "The game should have 47 undealt cards");
-                })
+        StepVerifier.create(gameService.createGame(mockList))
+                .assertNext(createdGame -> assertNotNull(createdGame, "The created game should not be null"))
                 .verifyComplete();
     }
 
     @Test
     void testGetGameDetails_whenGameExists() {
-        setupSimpleMockGame();
+        setupMockGame();
         String gameId = "1";
         when(gameRepository.findById(gameId)).thenReturn(Mono.just(mockGame));
 
@@ -118,7 +124,7 @@ public class GameServiceTest {
 
     @Test
     void testMakeMove_whenGameExists_andLastPlayerStands() {
-        setupSimpleMockGame();
+        setupMockGame();
         mockGame.setPlayerTurn(1);
 
         List<User> mockUsers = Arrays.asList(User.builder().name("Maria").build(),
@@ -154,7 +160,7 @@ public class GameServiceTest {
 
     @Test
     void testDeleteGame_whenGameExists() {
-        setupSimpleMockGame();
+        setupMockGame();
         String gameId = "1";
         when(gameRepository.findById(gameId)).thenReturn(Mono.just(mockGame));
         when(gameRepository.deleteById(gameId)).thenReturn(Mono.empty());

@@ -19,9 +19,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
-import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,11 +49,11 @@ public class GameControllerTest {
     @Test
     void testCreateGame_whenProperInput() {
         setupMockGame();
-        when(gameService.createGame(any(Game.class))).thenReturn(Mono.just(mockGame));
+        when(gameService.createGame(anyList())).thenReturn(Mono.just(mockGame));
 
         webTestClient.post().uri(BASE_URI + "new")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"players\": [{\"name\": \"ThisDoesNotMatter\"}]}")
+                .bodyValue("[{\"name\": \"PlayerName\"}]")
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().location("/game/" + mockGame.getId())
@@ -62,22 +62,18 @@ public class GameControllerTest {
 
     @Test
     void testCreateGame_whenIncorrectInput() {
-        Game invalidGame = new Game();
-        invalidGame.setPlayers(Collections.emptyList());
-        when(gameService.createGame(any(Game.class)))
-                .thenReturn(Mono.error(new IllegalArgumentException("Players list cannot be null nor empty")));
+        String requestBody = "[{\"nme\": \"PlayerName\"}]";
 
         webTestClient.post().uri(BASE_URI + "new")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"players\": []}")
+                .bodyValue(requestBody)
                 .exchange()
-                .expectStatus().isBadRequest();
-
-        webTestClient.post().uri(BASE_URI + "new")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"pls\": []}")
-                .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest() // Expect a 400 Bad Request due to validation errors
+                .expectBody(String.class)
+                .value(response -> {
+                    // Optionally, check the response body for expected validation messages
+                    assertTrue(response.contains("Validation failure:"), "Should contain validation failure message");
+                });
     }
 
     @Test

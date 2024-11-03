@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
@@ -64,9 +65,18 @@ public class GlobalExceptionHandler {
                 .body("Validation failure: " + errorMessage));
     }
 
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public Mono<ResponseEntity<String>> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        log.error("Error. Validation failure: {}", e.getMessage());
+        return Mono.just(ResponseEntity
+                .badRequest()
+                .body("Validation failure: " + e.getMessage()));
+    }
+
+
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<String>> handleGlobalException(Exception e) {
-        log.error("Unexpected error: {}", e.getMessage());
+        log.error("Error of type {}: {}", e.getClass().getSimpleName(), e.getMessage());
         return Mono.just(ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Unexpected error: " + e.getMessage()));

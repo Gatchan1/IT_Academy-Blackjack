@@ -23,16 +23,26 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Mono<Game> createGame(List<SimplePlayer> players) {
-        List<Player> gamePlayers = players.stream().map(simplePlayer -> Player.builder()
-                .name(simplePlayer.getName())
-                .initialBet(simplePlayer.getInitialBet())
-                .build()).toList();
-        Game newGame = new Game();
-        newGame.setPlayers(gamePlayers);
-        newGame.dealInitialCards();
+        List<Player> gamePlayers = mapToGamePlayers(players);
+        Game newGame = initializeGame(gamePlayers);
         return gameRepository.save(newGame)
                 .switchIfEmpty(Mono.error(new GameNotFoundException("Game not found")));
-        
+    }
+
+    private List<Player> mapToGamePlayers(List<SimplePlayer> players) {
+        return players.stream()
+                .map(simplePlayer -> Player.builder()
+                        .name(simplePlayer.getName())
+                        .initialBet(simplePlayer.getInitialBet())
+                        .build())
+                .toList();
+    }
+
+    private Game initializeGame(List<Player> gamePlayers) {
+        Game game = new Game();
+        game.setPlayers(gamePlayers);
+        game.dealInitialCards();
+        return game;
     }
 
     @Override
@@ -57,9 +67,8 @@ public class GameServiceImpl implements GameService {
                         return userService.insertScores(existingGame)
                                 .thenMany(saveGameMono)
                                 .then(Mono.just(result));
-                    } else {
-                        return saveGameMono.thenReturn(result);
                     }
+                    return saveGameMono.thenReturn(result);
                 });
     }
 

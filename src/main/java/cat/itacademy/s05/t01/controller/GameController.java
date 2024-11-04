@@ -85,7 +85,8 @@ public class GameController {
             @ApiResponse(responseCode = "404", description = "There's no game with such id", content = @Content)
     })
     @DeleteMapping("/{id}/delete")
-    public Mono<ResponseEntity<Void>> deleteGame(@PathVariable String id) {
+    public Mono<ResponseEntity<Void>> deleteGame(@Parameter(name = "id",
+            description = "Unique identifier of the game") @PathVariable String id) {
         return gameService.deleteGame(id)
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }

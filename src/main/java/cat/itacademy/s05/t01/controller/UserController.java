@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Game API Service", description = "Operations related to User API Service (MySQL)")
+@Tag(name = "User API Service", description = "Operations related to User API Service (MySQL)")
 public class UserController {
     private final UserServiceImpl userService;
     
